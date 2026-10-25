@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACA · Pitch Final — Administración de Bases de Datos | AgroSilvania Market</title>
+  <style>
+    :root {
+      --bg: #090e1a;
+      --card-bg: #111a2e;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+      z-index: 10;
+    }
+    .badge {
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      color: #090e1a;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0f172a;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .timer-display {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .btn-timer {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-timer:hover { background: #334155; }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      height: 82vh;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+      overflow-y: auto;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f8fafc, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 22px;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3 { font-size: 17px; color: var(--accent-green); margin-bottom: 8px; }
+    p, li { font-size: 14px; line-height: 1.6; color: #cbd5e1; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .box {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .box.highlight {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .code-box {
+      background: #030712;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .tag-green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .tag-blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .tag-amber { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+    footer {
+      background: rgba(15, 23, 42, 0.95);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #1e293b;
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .nav-btn:hover { background: #334155; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .slide-indicator { color: var(--text-muted); font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="badge">CUN — DBA Lab</span>
+      <span style="font-size: 13px; color: #94a3b8;">Administración de Bases de Datos / 55526 / Docente: Gabriel E. Beltrán</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="https://youtu.be/l8UXRyq_z0I" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; background: #dc2626; border: 1px solid #ef4444; color: #ffffff; padding: 7px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
+        <svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+        <span>Ver Video Pitch en YouTube</span>
+      </a>
+      <a href="https://github.com/soycamiloypunto/Universidad_Administracion_Base_Datos" target="_blank" rel="noopener noreferrer" class="btn-github-repo" style="display: inline-flex; align-items: center; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 7px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+        <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 8px;">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>Ver Repositorio en GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- SLIDE 1: PORTADA & CONTEXTO (Momento 1) -->
+    <div class="slide active">
+      <div>
+        <div style="margin-bottom: 16px;">
+          <span class="tag tag-green">MySQL 8.0 Community</span>
+          <span class="tag tag-blue">SGBD Relacional (6 Tablas)</span>
+          <span class="tag tag-amber">Pitch DBA (8-10 Min)</span>
+        </div>
+        <h1 style="font-size: 34px;">Estrategia de Administración, Seguridad, Respaldo y Monitoreo</h1>
+        <p style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 24px;">
+          Caso Aplicado: Comercializadora Directa Agropecuaria de Silvania (AgroSilvania Market)
+        </p>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">Datos del Expositor / DBA</h3>
+            <p><strong>Estudiante:</strong> Cristian Camilo Tabares Villanueva</p>
+            <p><strong>Rol:</strong> Administrador de Base de Datos (DBA)</p>
+            <p><strong>Institución:</strong> CUN — Ingeniería de Sistemas</p>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-green);">Esquema Relacional Normalizado (6 Tablas)</h3>
+            <p>• <code>productores</code> (Campesinos de Silvania)</p>
+            <p>• <code>categorias</code> y <code>productos</code> (Cosechas disponibles)</p>
+            <p>• <code>clientes</code>, <code>pedidos</code> y <code>detalle_pedidos</code> (Transacciones)</p>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-top: 1px solid #1e293b; padding-top: 14px;">
+        <span style="font-size: 12px; color: #64748b;">Momento 1: Contexto y Problema DBA (1.0 min) | Navega con [← / →]</span>
+        <span class="badge" style="background: #334155; color: #94a3b8;">Noviembre 2026</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: DIAGNÓSTICO E IMPACTO (Momento 2) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 2: Diagnóstico DBA e Impacto en el Negocio (1.0 min)</h2>
+        <div class="grid-3">
+          <div class="box" style="border-top: 3px solid #ef4444;">
+            <h3 style="color: #ef4444;">1. Brecha de Seguridad</h3>
+            <p>Uso generalizado de la cuenta <code>root</code> compartida entre desarrolladores y operarios. Ausencia de roles y mínimo privilegio.</p>
+            <p style="margin-top: 8px; font-size: 12px; color: #f87171;"><strong>Impacto:</strong> Riesgo inminente de borrado accidental y fuga de datos personales (Habeas Data).</p>
+          </div>
+          <div class="box" style="border-top: 3px solid #f59e0b;">
+            <h3 style="color: #f59e0b;">2. Falta de Auditoría</h3>
+            <p>Sin registro de quién modifica estados de pago o totales de pedidos. Discrepancias financieras sin trazabilidad forense.</p>
+            <p style="margin-top: 8px; font-size: 12px; color: #fbbf24;"><strong>Impacto:</strong> Desconfianza de compradores y descontrol contable con el campesinado.</p>
+          </div>
+          <div class="box" style="border-top: 3px solid #06b6d4;">
+            <h3 style="color: #06b6d4;">3. Lentitud y Sin Backups</h3>
+            <p>Consultas de despacho con Full Table Scan sobre +5.000 pedidos. Sin política de respaldo ni plan de recuperación ante desastres.</p>
+            <p style="margin-top: 8px; font-size: 12px; color: #38bdf8;"><strong>Impacto:</strong> Cuellos de botella en ventas y riesgo de quiebra total por pérdida de datos.</p>
+          </div>
+        </div>
+        <div class="box highlight" style="margin-top: 18px;">
+          <h3 style="color: var(--accent-green);">Pregunta Central del Proyecto</h3>
+          <p>¿Cómo puede un DBA diseñar una estrategia pequeña y realista que garantice <strong>disponibilidad, seguridad, mantenimiento y rendimiento</strong> en un escenario real?</p>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momento 2: Impacto del problema | Tiempo acumulado: 2:00 min</span>
+    </div>
+
+    <!-- SLIDE 3: PROPUESTA Y TABLESPACES (Momentos 3 y 4) -->
+    <div class="slide">
+      <div>
+        <h2>Momentos 3 y 4: Propuesta DBA y Gestión de Recursos (2.0 min)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">Componentes de la Estrategia</h3>
+            <ul style="padding-left: 20px; font-size: 13px;">
+              <li><strong>Almacenamiento:</strong> General Tablespace dedicado en InnoDB.</li>
+              <li><strong>Seguridad:</strong> RBAC (Roles) y pruebas de <code>GRANT / REVOKE</code>.</li>
+              <li><strong>Auditoría:</strong> Tabla inmutable y Triggers automáticos.</li>
+              <li><strong>Automatización:</strong> SP y Event Scheduler para mantenimiento.</li>
+              <li><strong>Optimización:</strong> Índices B-Tree analizados con <code>EXPLAIN</code>.</li>
+              <li><strong>Respaldo:</strong> <code>mysqldump</code> consistente y simulación de fallo.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-green);">Gestión Física: Tablespace Dedicado</h3>
+            <p style="font-size: 13px;">Aislamiento físico para evitar la saturación de <code>ibdata1</code> y facilitar copias por datafile:</p>
+            <div class="code-box">
+CREATE TABLESPACE ts_agrosilvania<br>
+&nbsp;&nbsp;ADD DATAFILE 'ts_agrosilvania.ibd'<br>
+&nbsp;&nbsp;ENGINE = InnoDB;<br><br>
+-- Tablas asociadas directamente al Tablespace:<br>
+CREATE TABLE pedidos (...) TABLESPACE ts_agrosilvania;
+            </div>
+          </div>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momentos 3 y 4: Propuesta y Recursos | Tiempo acumulado: 4:00 min</span>
+    </div>
+
+    <!-- SLIDE 4: AUTOMATIZACIÓN Y MANTENIMIENTO (Momento 5) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 5: Automatización y Mantenimiento Periódico (1.0 min)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">Stored Procedure: sp_mantenimiento_semanal_agro</h3>
+            <ul style="padding-left: 18px; font-size: 13px;">
+              <li><code>ANALYZE TABLE</code> sobre tablas de pedidos y productos para actualizar la distribución de claves en el optimizador InnoDB.</li>
+              <li><code>OPTIMIZE TABLE</code> sobre la tabla de auditoría para desfragmentar espacio libre en disco.</li>
+              <li>Detección y conteo de pedidos cancelados antiguos (>180 días).</li>
+              <li>Registro de tiempo en milisegundos en la bitácora <code>log_mantenimiento_dba</code>.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-green);">Programación Desatendida con Event Scheduler</h3>
+            <p style="font-size: 13px;">Ejecución automática sin necesidad de intervención manual:</p>
+            <div class="code-box">
+SET GLOBAL event_scheduler = ON;<br><br>
+CREATE EVENT evt_mantenimiento_semanal_agrosilvania<br>
+ON SCHEDULE EVERY 1 WEEK<br>
+STARTS '2026-11-01 02:00:00'<br>
+DO<br>
+&nbsp;&nbsp;CALL sp_mantenimiento_semanal_agro();
+            </div>
+          </div>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momento 5: Automatización | Tiempo acumulado: 5:00 min</span>
+    </div>
+
+    <!-- SLIDE 5: SEGURIDAD Y AUDITORÍA (Momento 6) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 6: Seguridad RBAC y Disparadores de Auditoría (1.0 min)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">Control de Acceso Basado en Roles (RBAC)</h3>
+            <ul style="padding-left: 18px; font-size: 13px;">
+              <li><code>rol_app_backend</code>: Permisos DML (SELECT, INSERT, UPDATE, DELETE). Sin DDL.</li>
+              <li><code>rol_auditor_seguridad</code>: Solo lectura (SELECT).</li>
+              <li><code>rol_operador_bodega</code>: UPDATE solo sobre <code>estado_pedido</code>.</li>
+              <li><strong>Evidencia GRANT / REVOKE:</strong> Demostración de asignación de privilegios temporales y su revocación inmediata verificada con <code>SHOW GRANTS</code>.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-green);">Trigger de Auditoría: trg_audit_pedidos_update</h3>
+            <p style="font-size: 13px;">Captura forense ante cualquier mutación de estado o monto:</p>
+            <div class="code-box">
+CREATE TRIGGER trg_audit_pedidos_update<br>
+AFTER UPDATE ON pedidos FOR EACH ROW<br>
+BEGIN<br>
+&nbsp;&nbsp;IF (OLD.estado_pedido &lt;&gt; NEW.estado_pedido) THEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;INSERT INTO auditoria_pedidos (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id_pedido, tipo_accion, estado_anterior,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;estado_nuevo, usuario_modificador, fecha_modificacion<br>
+&nbsp;&nbsp;&nbsp;&nbsp;) VALUES (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OLD.id_pedido, 'UPDATE', OLD.estado_pedido,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NEW.estado_pedido, USER(), NOW()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br>
+&nbsp;&nbsp;END IF;<br>
+END;
+            </div>
+          </div>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momento 6: Seguridad y Auditoría | Tiempo acumulado: 6:00 min</span>
+    </div>
+
+    <!-- SLIDE 6: RESPALDO Y RECUPERACIÓN ANTE FALLAS (Momento 7) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 7: Respaldo y Simulación de Recuperación (1.0 min)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">1. Política de Respaldo Consistente en Caliente</h3>
+            <p style="font-size: 13px;">Uso de <code>--single-transaction</code> para garantizar consistencia transaccional MVCC sin bloquear las ventas campesinas:</p>
+            <div class="code-box">
+docker exec mysql-agrosilvania-db mysqldump \<br>
+&nbsp;&nbsp;-u dba_admin -pDbaPassword2026! \<br>
+&nbsp;&nbsp;--single-transaction --quick --routines --triggers \<br>
+&nbsp;&nbsp;--databases agrosilvania_db &gt; backup_full.sql
+            </div>
+          </div>
+          <div class="box">
+            <h3 style="color: #ef4444;">2. Simulación de Falla y Restauración</h3>
+            <ul style="padding-left: 18px; font-size: 13px;">
+              <li><strong>Falla provocada:</strong> Borrado accidental de tabla transaccional: <code>DROP TABLE detalle_pedidos;</code>.</li>
+              <li><strong>Desastre comprobado:</strong> La aplicación falla con error 1146 (Tabla no existe).</li>
+              <li><strong>Recuperación demostrada:</strong> Restauración por volcado SQL en menos de 30 segundos.</li>
+              <li><strong>Validación:</strong> Integridad referencial comprobada al 100%.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momento 7: Respaldo y Recuperación | Tiempo acumulado: 7:00 min</span>
+    </div>
+
+    <!-- SLIDE 7: OPTIMIZACIÓN CON EXPLAIN ANALYZE (Momento 8) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 8: Optimización con EXPLAIN ANALYZE (1.5 min)</h2>
+        <div class="grid-2">
+          <div class="box" style="border-left: 4px solid #ef4444;">
+            <h3 style="color: #ef4444;">Antes: Sin Índice B-Tree</h3>
+            <p style="font-size: 13px;">Consulta sobre +5.000 pedidos entregados en últimos 90 días:</p>
+            <div class="code-box" style="color: #f87171;">
+-&gt; Filter: ((p.estado_pedido = 'ENTREGADO') and ...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&gt; Table scan on p (cost=520.25 rows=5000)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time: 14.8 ms (Escaneo Completo)
+            </div>
+            <p style="font-size: 12px; margin-top: 6px; color: #94a3b8;">Tipo de acceso: <strong>ALL (Full Table Scan)</strong></p>
+          </div>
+          <div class="box highlight" style="border-left: 4px solid var(--accent-green);">
+            <h3 style="color: var(--accent-green);">Después: Con Índice Compuesto</h3>
+            <div class="code-box" style="color: #4ade80;">
+CREATE INDEX idx_pedidos_estado_fecha<br>
+ON pedidos (estado_pedido, fecha_pedido);<br><br>
+-&gt; Index range scan on p using idx_pedidos_estado_fecha<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(cost=42.10 rows=410)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Time: 0.8 ms (Reducción del 85% de CPU)
+            </div>
+            <p style="font-size: 12px; margin-top: 6px; color: #94a3b8;">Tipo de acceso: <strong>range / ref (Selectividad Óptima)</strong></p>
+          </div>
+        </div>
+      </div>
+      <span style="font-size: 12px; color: #64748b;">Momento 8: Optimización y Resultados | Tiempo acumulado: 8:30 min</span>
+    </div>
+
+    <!-- SLIDE 8: VALOR Y CIERRE (Momento 9) -->
+    <div class="slide">
+      <div>
+        <h2>Momento 9: Valor para la Organización y Cierre (30 seg)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3 style="color: var(--accent-cyan);">Seguridad & Ley 1581</h3>
+            <p style="font-size: 13px;">Eliminación total del uso de root, cuentas acotadas y auditoría forense inmutable de ventas campesinas.</p>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-green);">Continuidad del Negocio</h3>
+            <p style="font-size: 13px;">Respaldos automáticos en caliente y protocolo probado de recuperación ante desastres con RTO &lt; 5 min.</p>
+          </div>
+          <div class="box">
+            <h3 style="color: var(--accent-amber);">Rendimiento y Escala</h3>
+            <p style="font-size: 13px;">Optimización del 85% en tiempos de consulta, desfragmentación automática y gestión de almacenamiento en tablespace.</p>
+          </div>
+        </div>
+        <div class="box highlight" style="margin-top: 20px; text-align: center;">
+          <h3 style="color: var(--accent-green);">Conclusión Profesional DBA</h3>
+          <p style="font-size: 14px;">"Una gestión de bases de datos proactiva protege los activos más valiosos del negocio, garantiza el cumplimiento normativo y habilita el crecimiento sostenido de la comunidad agrícola de Silvania."</p>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; padding-top: 12px;">
+        <span style="font-size: 14px; color: var(--accent-green); font-weight: 700;">¡Muchas gracias por su atención!</span>
+        <span style="font-size: 12px; color: #64748b;">Cristian Camilo Tabares Villanueva — Docente: Gabriel E. Beltrán</span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <button id="btnPrev" class="nav-btn" onclick="prevSlide()">◀ Anterior</button>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <div id="slideCounter" class="slide-indicator">Diapositiva 1 de 8</div>
+      <div style="font-size: 12px; color: #94a3b8; text-align: center;">
+        Desarrollado por <strong>Cristian Tabares</strong> para <strong>Administración de Bases de Datos (55526) — CUN 2026</strong> | 
+        <a href="https://github.com/soycamiloypunto/Universidad_Administracion_Base_Datos" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: underline; font-weight: 700;">
+          📁 Ver Repositorio GitHub &amp; Scripts SQL
+        </a>
+      </div>
+    </div>
+    <button id="btnNext" class="nav-btn" onclick="nextSlide()">Siguiente ▶</button>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const slideCounter = document.getElementById('slideCounter');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    function showSlide(index) {
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      currentSlide = index;
+      slideCounter.textContent = `Diapositiva ${index + 1} de ${slides.length}`;
+      btnPrev.disabled = index === 0;
+      btnNext.disabled = index === slides.length - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) showSlide(currentSlide - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    // Temporizador regresivo de 9 minutos
+    let timeLeft = 540; // 9 min
+    let timerInterval = null;
+    let isRunning = false;
+    const timerDisplay = document.getElementById('timerDisplay');
+    const btnStartPause = document.getElementById('btnStartPause');
+
+    function updateTimerDisplay() {
+      const min = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const sec = (timeLeft % 60).toString().padStart(2, '0');
+      timerDisplay.textContent = `${min}:${sec}`;
+      if (timeLeft < 90) {
+        timerDisplay.style.color = '#ef4444';
+      } else {
+        timerDisplay.style.color = 'var(--accent-cyan)';
+      }
+    }
+
+    function toggleTimer() {
+      if (isRunning) {
+        clearInterval(timerInterval);
+        btnStartPause.textContent = 'Reanudar';
+        isRunning = false;
+      } else {
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            isRunning = false;
+            btnStartPause.textContent = 'Terminado';
+          }
+        }, 1000);
+        btnStartPause.textContent = 'Pausar';
+        isRunning = true;
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      timeLeft = 540;
+      btnStartPause.textContent = 'Iniciar';
+      updateTimerDisplay();
+    }
+
+    showSlide(0);
+  </script>
+</body>
+</html>

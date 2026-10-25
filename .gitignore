@@ -1,0 +1,9 @@
+# Guiones privados de sustentación DBA
+Guion*
+*guion*
+*Guion*
+
+# Archivos temporales y de bloqueo de Office / LibreOffice
+.~lock.*
+~$*
+*.tmp

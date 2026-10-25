@@ -1,0 +1,31 @@
+services:
+  mysql-agrosilvania:
+    image: mysql:8.0
+    container_name: mysql-agrosilvania-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: RootSecurePassword2026!
+      MYSQL_DATABASE: agrosilvania_db
+      MYSQL_USER: dba_admin
+      MYSQL_PASSWORD: DbaPassword2026!
+      TZ: "America/Bogota"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./scripts_sql/01_ddl_tablespace_schema.sql:/docker-entrypoint-initdb.d/01_ddl_tablespace_schema.sql:ro
+      - ./scripts_sql/02_poblacion_datos_semilla.sql:/docker-entrypoint-initdb.d/02_poblacion_datos_semilla.sql:ro
+      - ./scripts_sql:/scripts_sql:ro
+      - ./backups:/backups
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=256M
+      --innodb-file-per-table=1
+      --innodb-flush-log-at-trx-commit=1
+      --event-scheduler=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  db_data:
+    driver: local
